@@ -35,7 +35,7 @@ const ReagraphScript = () => {
       header: true,
       dynamicTyping: true,
       step: (row, parser) => {
-        if (edgesList.length >= 4000) return; // Node cap (as 50k nodes fries my computer)
+        if (edgesList.length >= 2000) return; // Node cap (as 50k nodes fries my computer)
         
         const row_data = row.data;
         

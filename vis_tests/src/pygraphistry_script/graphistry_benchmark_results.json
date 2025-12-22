@@ -1,0 +1,12 @@
+{
+  "timings": {
+    "csv_loading": 1.168855905532837,
+    "data_filtering": 0.054799556732177734,
+    "data_transformation": 0.05538678169250488,
+    "graph_building": 0.37262868881225586,
+    "plot_upload": 4.677043676376343,
+    "total_time": 6.328861713409424
+  },
+  "node_count": 42945,
+  "edge_count": 49000
+}

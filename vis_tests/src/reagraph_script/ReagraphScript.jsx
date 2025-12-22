@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { GraphCanvas, darkTheme} from 'reagraph';
 import Papa from 'papaparse';
 import { forceAtlas2 } from 'reagraph';
@@ -11,8 +11,16 @@ const ReagraphScript = () => {
   const [nodeCount, setNodeCount] = useState(0);
   const [edgeCount, setEdgeCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  
+  // Benchmark tracking
+  const timingsRef = useRef({});
+  const startTimeRef = useRef(Date.now());
+  const [benchmarks, setBenchmarks] = useState({});
 
   useEffect(() => {
+    // Benchmark 1: Edge Parsing
+    const startEdgeParse = Date.now();
+    
     // Given we aren't loading ALL nodes, we need to jump through some hoops
     // (as not all edges will appear if most nodes are missing)
     // So we'll scan edges first to find which nodes we need
@@ -57,6 +65,12 @@ const ReagraphScript = () => {
         setEdgeCount((count) => count + 1); // Increment counter
       },
       complete: () => {
+        timingsRef.current.edge_parsing = Date.now() - startEdgeParse;
+        console.log(`Edge Parsing: ${timingsRef.current.edge_parsing}ms`);
+        
+        // Benchmark 2: Node Parsing
+        const startNodeParse = Date.now();
+        
         // NOW when we finish our edges parsing we'll parse nodes
         Papa.parse('../../dataset_2/dataset_nodes.csv', {
           download: true,
@@ -87,6 +101,12 @@ const ReagraphScript = () => {
             }
           },
           complete: () => {
+            timingsRef.current.node_parsing = Date.now() - startNodeParse;
+            console.log(`Node Parsing: ${timingsRef.current.node_parsing}ms`);
+            
+            // Benchmark 3: Data Transformation
+            const startTransform = Date.now();
+            
             const finalNodes = Array.from(nodeMap.values());
             
             // Lastly we'll filter edges list to only include nodes we loaded
@@ -111,10 +131,22 @@ const ReagraphScript = () => {
                 };
               });
             
+            timingsRef.current.data_transformation = Date.now() - startTransform;
+            console.log(`Data Transformation: ${timingsRef.current.data_transformation}ms`);
+            
             // If nodes already done, finish loading state
             setNodes(finalNodes);
             setEdges(finalEdges);
             setLoading(false);
+            
+            timingsRef.current.total_time = Date.now() - startTimeRef.current;
+            console.log(`Total Time: ${timingsRef.current.total_time}ms`);
+            
+            setBenchmarks({
+              ...timingsRef.current,
+              node_count: finalNodes.length,
+              edge_count: finalEdges.length
+            });
           }
         });
       }
@@ -131,9 +163,27 @@ const ReagraphScript = () => {
     );
   }
 
-  return <GraphCanvas nodes={nodes} edges={edges}  // What's soooo good about Reagraph is that ALL you have to do is plug in a graph type and it does it for you
-  layout={forceAtlas2} // That above comment is kinda wrong as for a lot of layouts you need some calculatable x/y positions, but for force graph it's fine!
-  theme={darkTheme}/>;
+  return (
+    <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
+      <GraphCanvas nodes={nodes} edges={edges}  // What's soooo good about Reagraph is that ALL you have to do is plug in a graph type and it does it for you
+      layout={forceAtlas2} // That above comment is kinda wrong as for a lot of layouts you need some calculatable x/y positions, but for force graph it's fine!
+      theme={darkTheme}/>
+      
+      <div style={{position: 'absolute', top: '10px', left: '10px', background: 'rgba(0,0,0,0.8)',color: 'white',
+      padding: '15px', borderRadius: '8px', fontFamily: 'monospace',
+      fontSize: '12px', maxWidth: '300px'}}>
+        <h3 style={{ margin: '0 0 10px 0' }}>Reagraph Benchmarks</h3>
+        <div>Nodes: {benchmarks.node_count}</div>
+        <div>Edges: {benchmarks.edge_count}</div>
+        <hr style={{ margin: '10px 0' }} />
+        <div>Edge Parsing: {benchmarks.edge_parsing}ms</div>
+        <div>Node Parsing: {benchmarks.node_parsing}ms</div>
+        <div>Data Transform: {benchmarks.data_transformation}ms</div>
+        <hr style={{ margin: '10px 0' }} />
+        <div><strong>Total: {benchmarks.total_time}ms</strong></div>
+      </div>
+    </div>
+  );
 };
 
 export default ReagraphScript;

@@ -11,11 +11,13 @@ const ReagraphScript = () => {
   const [nodeCount, setNodeCount] = useState(0);
   const [edgeCount, setEdgeCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [renderComplete, setRenderComplete] = useState(false);
   
   // Benchmark tracking
   const timingsRef = useRef({});
   const startTimeRef = useRef(Date.now());
   const [benchmarks, setBenchmarks] = useState({});
+  const renderStartRef = useRef(null);
 
   useEffect(() => {
     // Benchmark 1: Edge Parsing
@@ -138,6 +140,7 @@ const ReagraphScript = () => {
             setNodes(finalNodes);
             setEdges(finalEdges);
             setLoading(false);
+            renderStartRef.current = Date.now();
             
             timingsRef.current.total_time = Date.now() - startTimeRef.current;
             console.log(`Total Time: ${timingsRef.current.total_time}ms`);
@@ -153,6 +156,23 @@ const ReagraphScript = () => {
     });
   }, []);
 
+  useEffect(() => {
+    if (!loading && !renderComplete) {
+      const timer = setTimeout(() => {
+        const renderTime = Date.now() - startTimeRef.current;
+        timingsRef.current.render_complete = renderTime;
+        console.log(`Render Complete (fallback): ${renderTime}ms`);
+        setRenderComplete(true);
+        setBenchmarks(prev => ({
+          ...prev,
+          render_complete: renderTime
+        }));
+      }, 2000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [loading, renderComplete]);
+
   if (loading) {
     return (
       <div>
@@ -165,9 +185,24 @@ const ReagraphScript = () => {
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
-      <GraphCanvas nodes={nodes} edges={edges}  // What's soooo good about Reagraph is that ALL you have to do is plug in a graph type and it does it for you
-      layout={forceAtlas2} // That above comment is kinda wrong as for a lot of layouts you need some calculatable x/y positions, but for force graph it's fine!
-      theme={darkTheme}/>
+      <GraphCanvas 
+        nodes={nodes} 
+        edges={edges}  // What's soooo good about Reagraph is that ALL you have to do is plug in a graph type and it does it for you
+        layout={forceAtlas2} // That above comment is kinda wrong as for a lot of layouts you need some calculatable x/y positions, but for force graph it's fine!
+        theme={darkTheme}
+        onLayoutChange={(layout) => {
+          if (!renderComplete) {
+            const renderTime = Date.now() - startTimeRef.current;
+            timingsRef.current.render_complete = renderTime;
+            console.log(`Render Complete: ${renderTime}ms`);
+            setRenderComplete(true);
+            setBenchmarks(prev => ({
+              ...prev,
+              render_complete: renderTime
+            }));
+          }
+        }}
+      />
       
       <div style={{position: 'absolute', top: '10px', left: '10px', background: 'rgba(0,0,0,0.8)',color: 'white',
       padding: '15px', borderRadius: '8px', fontFamily: 'monospace',
@@ -179,8 +214,9 @@ const ReagraphScript = () => {
         <div>Edge Parsing: {benchmarks.edge_parsing}ms</div>
         <div>Node Parsing: {benchmarks.node_parsing}ms</div>
         <div>Data Transform: {benchmarks.data_transformation}ms</div>
+        <div>Data Prep Total: {benchmarks.total_time}ms</div>
         <hr style={{ margin: '10px 0' }} />
-        <div><strong>Total: {benchmarks.total_time}ms</strong></div>
+        <div><strong>Full Render: {benchmarks.render_complete || 'calculating...'}ms</strong></div>
       </div>
     </div>
   );

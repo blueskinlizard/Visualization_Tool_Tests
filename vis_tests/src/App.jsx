@@ -11,10 +11,8 @@ function App() {
   return (
     <>
       <div>
-          <p className="title">
-            Output visualization:
-          </p>
-          <DeckGLScript></DeckGLScript>
+
+      <DeckGLScript></DeckGLScript>
       </div>
       
     </>

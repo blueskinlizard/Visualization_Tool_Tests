@@ -19,8 +19,11 @@ const ReagraphScript = () => {
   const [benchmarks, setBenchmarks] = useState({});
   const renderStartRef = useRef(null);
 
+const hasLoadedRef = useRef(false);
+
   useEffect(() => {
-    // Benchmark 1: Edge Parsing
+    if (hasLoadedRef.current) return;
+    hasLoadedRef.current = true;
     const startEdgeParse = Date.now();
     
     // Given we aren't loading ALL nodes, we need to jump through some hoops
@@ -45,7 +48,7 @@ const ReagraphScript = () => {
       header: true,
       dynamicTyping: true,
       step: (row, parser) => {
-        if (edgesList.length >= 2000) return; // Node cap (as 50k nodes fries my computer)
+        if (edgesList.length >= 49000) return; // Node cap (as 50k nodes fries my computer)
         
         const row_data = row.data;
         

@@ -2,8 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import DeckGL from '@deck.gl/react';
 import { LineLayer, ScatterplotLayer } from '@deck.gl/layers';
 import { OrthographicView } from '@deck.gl/core';
-import { CSVLoader } from '@loaders.gl/csv';
-import { load } from '@loaders.gl/core';
+import Papa from 'papaparse';
 import * as d3 from 'd3';
 
 const categoryColors = {
@@ -21,11 +20,17 @@ const DeckGLBenchmark = () => {
   const timingsRef = useRef({});
   const startTimeRef = useRef(Date.now());
 
-  useEffect(() => {loadAndProcessData()}, []);
+  const hasLoadedRef = useRef(false);
+
+  useEffect(() => {
+    if (hasLoadedRef.current) return;
+    hasLoadedRef.current = true;
+    loadAndProcessData();
+  }, []);
 
   const loadAndProcessData = async () => {
-    // Benchmark 1: Edge Loading
-    const startEdgeLoad = Date.now();
+    // Benchmark 1: Edge Loading & Parsing
+    const startEdgeParse = Date.now();
 
     const edgesList = [];
     const neededNodeIds = new Set();
@@ -33,83 +38,88 @@ const DeckGLBenchmark = () => {
       
     // What's good about Deck is that instead of having to convert to JSON when parsing, it kinda has the ability to parse CSVs themselves.
     // The reason I say "kinda" is because this csv parsing package is part of a separate library, not deckgl, but it is commonly used in deck applications?
-    const edgesResponse = await load('../../dataset_2/dataset_edges.csv', CSVLoader, {
-        csv: {
-            header: true,
-            dynamicTyping: true
-        }});
-    const edgesData = edgesResponse.data || edgesResponse; // I honestly don't know whether to treat the response as an object or array so I'll just add a fallback
     
-    timingsRef.current.edge_loading = Date.now() - startEdgeLoad;
-    console.log(`Edge Loading: ${timingsRef.current.edge_loading}ms`);
-    
-    // Benchmark 2: Edge Parsing
-    const startEdgeParse = Date.now();
-    
-    // Take first 4k edges (remember don't wanna fry my computer) and track necessary edges (like we do in our Reagraph script)
-    edgesData.slice(0, 4000).forEach(row_data => { // 4k edges (should be 8k node)
-        const sourceId = String(row_data.source_id);
-        const targetId = String(row_data.target_id);
-        
-        edgesList.push({
+    await new Promise((resolve) => {
+      Papa.parse('../../dataset_2/dataset_edges.csv', {
+        download: true,
+        header: true,
+        dynamicTyping: true,
+        step: (row) => {
+          if (edgesList.length >= 12500) return; // 4k edges (should be 8k node)
+          
+          const row_data = row.data;
+          const sourceId = String(row_data.source_id);
+          const targetId = String(row_data.target_id);
+          
+          edgesList.push({
             source: sourceId,
             target: targetId,
             influence: row_data.influence,
             derivative: row_data.derivative,
             category: row_data.category
-        });
-        
-        // Track which nodes we are gonna actually need in our array
-        neededNodeIds.add(sourceId);
-        neededNodeIds.add(targetId);
+          });
+          
+          // Track which nodes we are gonna actually need in our array
+          neededNodeIds.add(sourceId);
+          neededNodeIds.add(targetId);
+        },
+        complete: () => {
+          resolve();
+        }
       });
+    });
     
     timingsRef.current.edge_parsing = Date.now() - startEdgeParse;
     console.log(`Edge Parsing: ${timingsRef.current.edge_parsing}ms`);
 
-    // Benchmark 3: Node Loading
-    const startNodeLoad = Date.now();
-    
-    // Load nodes w/ CSVLoader import
-    const nodesResponse = await load('../../dataset_2/dataset_nodes.csv', CSVLoader, {
-      csv: {
-          header: true,
-          dynamicTyping: true
-      }});
-    const nodesData = nodesResponse.data || nodesResponse;
-    
-    timingsRef.current.node_loading = Date.now() - startNodeLoad;
-    console.log(`Node Loading: ${timingsRef.current.node_loading}ms`);
-    
-    // Benchmark 4: Node Parsing
+    // Benchmark 2: Node Loading & Parsing
     const startNodeParse = Date.now();
-    
-    nodesData.forEach(row_data => {
-      const nodeId = String(row_data.node_id);
-      
-      if (neededNodeIds.has(nodeId)) { // Check if our node made it in the "needed list"
-        const nodeMass = row_data.mass || 17; // if nan fallback
-        const nodeSize = Math.max(5, nodeMass / 2);
-        
-        nodeMap.set(nodeId, {
-          id: nodeId,
-          label: `node_${row_data.node_id}`,
-          mass: nodeMass,
-          size: nodeSize,
-          tagged: row_data.tagged,
-          reactive: row_data.reactive,
-          max_speed: row_data.max_speed,
-          x: 0,
-          y: 0
+
+    // Load nodes w/ PapaParse
+    await new Promise((resolve) => {
+      Papa.parse('../../dataset_2/dataset_nodes.csv', {
+        download: true,
+        header: true,
+        dynamicTyping: true,
+        step: (row, parser) => {
+          const row_data = row.data;
+          const nodeId = String(row_data.node_id);
+          
+          if (neededNodeIds.has(nodeId)) {
+            const nodeMass = row_data.mass || 17;
+            const nodeSize = Math.max(5, nodeMass / 2);
+            
+            nodeMap.set(nodeId, {
+              id: nodeId,
+              label: `node_${row_data.node_id}`,
+              mass: nodeMass,
+              size: nodeSize,
+              tagged: row_data.tagged,
+              reactive: row_data.reactive,
+              max_speed: row_data.max_speed,
+              x: 0,
+              y: 0
+            });
+          }
+          
+          // Stop parsing once we've found all needed nodes
+          if (nodeMap.size === neededNodeIds.size) {
+            console.log(`Aborting after finding all ${nodeMap.size} nodes`);
+            parser.abort();
+          }
+        },
+        complete: () => {
+          resolve();
+        }
       });
-    }});
+    });
 
     const nodes = Array.from(nodeMap.values()); // prune that array
     
     timingsRef.current.node_parsing = Date.now() - startNodeParse;
     console.log(`Node Parsing: ${timingsRef.current.node_parsing}ms`);
       
-    // Benchmark 5: Data Transformation
+    // Benchmark 3: Data Transformation
     const startTransform = Date.now();
     
     // Filter edges to only include nodes we loaded
@@ -129,7 +139,7 @@ const DeckGLBenchmark = () => {
     timingsRef.current.data_transformation = Date.now() - startTransform;
     console.log(`Data Transformation: ${timingsRef.current.data_transformation}ms`);
       
-    // Benchmark 6: D3 Layout Calculation
+    // Benchmark 4: D3 Layout Calculation
     const startD3Layout = Date.now();
     
     // Run the d3 layout calc
@@ -149,7 +159,7 @@ const DeckGLBenchmark = () => {
     timingsRef.current.d3_layout = Date.now() - startD3Layout;
     console.log(`D3 Layout: ${timingsRef.current.d3_layout}ms`);
 
-    // Benchmark 7: Edge Preparation
+    // Benchmark 5: Edge Preparation
     const startEdgePrep = Date.now();
     
     // prepare edges w/ positions
@@ -222,9 +232,7 @@ const DeckGLBenchmark = () => {
           <div>Nodes: {benchmarks.node_count}</div>
           <div>Edges: {benchmarks.edge_count}</div>
           <hr style={{ margin: '10px 0' }} />
-          <div>Edge Loading: {benchmarks.edge_loading}ms</div>
           <div>Edge Parsing: {benchmarks.edge_parsing}ms</div>
-          <div>Node Loading: {benchmarks.node_loading}ms</div>
           <div>Node Parsing: {benchmarks.node_parsing}ms</div>
           <div>Data Transform: {benchmarks.data_transformation}ms</div>
           <div>D3 Layout: {benchmarks.d3_layout}ms</div>

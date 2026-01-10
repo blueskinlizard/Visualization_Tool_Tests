@@ -3,7 +3,7 @@ import { GraphCanvas, darkTheme} from 'reagraph';
 import Papa from 'papaparse';
 import { forceAtlas2 } from 'reagraph';
 
-const ReagraphScript = () => {
+const ReagraphScript = ( {edgeLimit = 4000} ) => {
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
   
@@ -43,12 +43,12 @@ const hasLoadedRef = useRef(false);
     // So most values are between -8 and +8 (within 2 SD)
 
     // Parse edges
-    Papa.parse('../../dataset_2/dataset_edges.csv', {
+    Papa.parse('/dataset_2/dataset_edges.csv', {
       download: true,
       header: true,
       dynamicTyping: true,
       step: (row, parser) => {
-        if (edgesList.length >= 49000) return; // Node cap (as 50k nodes fries my computer)
+        if (edgesList.length >= edgeLimit) return; // Node cap (as 50k nodes fries my computer)
         
         const row_data = row.data;
         
@@ -77,7 +77,7 @@ const hasLoadedRef = useRef(false);
         const startNodeParse = Date.now();
         
         // NOW when we finish our edges parsing we'll parse nodes
-        Papa.parse('../../dataset_2/dataset_nodes.csv', {
+        Papa.parse('/dataset_2/dataset_nodes.csv', {
           download: true,
           header: true,
           dynamicTyping: true,

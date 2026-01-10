@@ -1,0 +1,181 @@
+{
+    "generator_type": "generate",
+    "is_directed": false,
+    "node": {
+        "num_nodes": 50000,
+        "attributes": [
+            {
+                "description": {
+                    "name": "node_id",
+                    "data_type": "int",
+                    "is_id": true
+                },
+                "generation": {
+                    "distribution": "none"
+                }
+            },
+            {
+                "description": {
+                    "name": "mass",
+                    "data_type": "float",
+                    "is_id": false
+                },
+                "generation": {
+                    "distribution": "normal",
+                    "mean": 17,
+                    "sd": 4
+                }
+            },
+            {
+                "description": {
+                    "name": "max_speed",
+                    "data_type": "float",
+                    "is_id": false
+                },
+                "generation": {
+                    "distribution": "powerlaw",
+                    "scale": 10,
+                    "exponent": 2.3
+                }
+            },
+            {
+                "description": {
+                    "name": "tagged",
+                    "data_type": "boolean",
+                    "is_id": false
+                },
+                "generation": {
+                    "distribution": "categorical",
+                    "categories": [
+                        {
+                            "attribute_value": true,
+                            "weight": 0.18
+                        },
+                        {
+                            "attribute_value": false,
+                            "weight": 0.82
+                        }
+                    ]
+                }
+            },
+            {
+                "description": {
+                    "name": "reactive",
+                    "data_type": "boolean",
+                    "is_id": false
+                },
+                "generation": {
+                    "distribution": "categorical",
+                    "categories": [
+                        {
+                            "attribute_value": true,
+                            "weight": 0.55
+                        },
+                        {
+                            "attribute_value": false,
+                            "weight": 0.45
+                        }
+                    ]
+                }
+            }
+        ]
+    },
+    "edge": {
+        "num_edges": 49760,
+        "attributes": [
+            {
+                "description": {
+                    "name": "source_id",
+                    "data_type": "int",
+                    "is_source": true,
+                    "is_target": false
+                },
+                "generation": {
+                    "distribution": "none"
+                }
+            },
+            {
+                "description": {
+                    "name": "target_id",
+                    "data_type": "int",
+                    "is_source": false,
+                    "is_target": true
+                },
+                "generation": {
+                    "distribution": "none"
+                }
+            },
+            {
+                "description": {
+                    "name": "influence",
+                    "data_type": "float",
+                    "is_source": false,
+                    "is_target": false
+                },
+                "generation": {
+                    "distribution": "normal",
+                    "mean": 0,
+                    "sd": 4
+                }
+            },
+            {
+                "description": {
+                    "name": "derivative",
+                    "data_type": "string",
+                    "is_source": false,
+                    "is_target": false
+                },
+                "generation": {
+                    "distribution": "categorical",
+                    "categories": [
+                        {
+                            "attribute_value": "total",
+                            "weight": 0.5
+                        },
+                        {
+                            "attribute_value": "partial",
+                            "weight": 0.1
+                        },
+                        {
+                            "attribute_value": "none",
+                            "weight": 0.4
+                        }
+                    ]
+                }
+            },
+            {
+                "description": {
+                    "name": "category",
+                    "data_type": "string",
+                    "is_source": false,
+                    "is_target": false
+                },
+                "generation": {
+                    "distribution": "categorical",
+                    "categories": [
+                        {
+                            "attribute_value": "green",
+                            "weight": 0.43
+                        },
+                        {
+                            "attribute_value": "yellow",
+                            "weight": 0.12
+                        },
+                        {
+                            "attribute_value": "red",
+                            "weight": 0.28
+                        },
+                        {
+                            "attribute_value": "black",
+                            "weight": 0.17
+                        }
+                    ]
+                }
+            }
+        ]
+    },
+    "connectivity": {
+        "pattern": "node_edge_ratio",
+        "node_edge_ratio": 1
+    }
+}

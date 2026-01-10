@@ -12,7 +12,7 @@ const categoryColors = {
     'red': [248, 113, 113]
 };
 
-const DeckGLBenchmark = () => {
+const DeckGLBenchmark = ({edgeLimit = 4000 }) => {
   const [graphData, setGraphData] = useState({ nodes: [], edges: [] }); // State to store nodes/edges
   const [loading, setLoading] = useState(true);
   const [benchmarks, setBenchmarks] = useState({});
@@ -40,12 +40,12 @@ const DeckGLBenchmark = () => {
     // The reason I say "kinda" is because this csv parsing package is part of a separate library, not deckgl, but it is commonly used in deck applications?
     
     await new Promise((resolve) => {
-      Papa.parse('../../dataset_2/dataset_edges.csv', {
+      Papa.parse('/dataset_2/dataset_edges.csv', {
         download: true,
         header: true,
         dynamicTyping: true,
         step: (row) => {
-          if (edgesList.length >= 12500) return; // 4k edges (should be 8k node)
+          if (edgesList.length >= edgeLimit) return; // 4k edges (should be 8k node)
           
           const row_data = row.data;
           const sourceId = String(row_data.source_id);
@@ -77,7 +77,7 @@ const DeckGLBenchmark = () => {
 
     // Load nodes w/ PapaParse
     await new Promise((resolve) => {
-      Papa.parse('../../dataset_2/dataset_nodes.csv', {
+      Papa.parse('/dataset_2/dataset_nodes.csv', {
         download: true,
         header: true,
         dynamicTyping: true,

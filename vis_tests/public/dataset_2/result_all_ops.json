@@ -1,0 +1,428 @@
+{
+	"workflow_0": {
+		"data_scope_results": {
+			"data_filter": {
+				"data_source": "raw",
+				"data_operation": null
+			},
+			"num_nodes": 50000,
+			"num_edges": 49760
+		},
+		"analysis_scope_results": [
+			{
+				"analysis_focus": "Graph",
+				"analysis_task": "Group",
+				"system_operation": {
+					"op": "Graph_Clustering"
+				}
+			},
+			{
+				"analysis_focus": "Graph",
+				"analysis_task": "Group",
+				"system_operation": {
+					"op": "Connected_Components"
+				}
+			},
+			{
+				"analysis_focus": "Comparison",
+				"analysis_task": "Extrema",
+				"system_operation": {
+					"op": "Minimum",
+					"params": {
+						"attribute": "category"
+					}
+				}
+			}
+		]
+	},
+	"workflow_1": {
+		"data_scope_results": {
+			"data_filter": {
+				"data_source": "prior",
+				"data_operation": "Edge_Attribute_Filter",
+				"str_value": [
+					"none"
+				],
+				"operator": "=",
+				"attribute": "derivative"
+			},
+			"num_nodes": 50000,
+			"num_edges": 19852
+		},
+		"analysis_scope_results": [
+			{
+				"analysis_focus": "Attributes",
+				"analysis_task": "Compute",
+				"system_operation": {
+					"op": "Count"
+				}
+			}
+		]
+	},
+	"workflow_2": {
+		"data_scope_results": {
+			"data_filter": {
+				"data_source": "prior",
+				"data_operation": "Node_Attribute_Filter",
+				"flt_value": 0.24,
+				"operator": "<",
+				"attribute": "max_speed"
+			},
+			"num_nodes": 2659,
+			"num_edges": 52
+		},
+		"analysis_scope_results": [
+			{
+				"analysis_focus": "Graph",
+				"analysis_task": "Group",
+				"system_operation": {
+					"op": "Connected_Components"
+				}
+			},
+			{
+				"analysis_focus": "Attributes",
+				"analysis_task": "Compute",
+				"system_operation": {
+					"op": "Local_Custom_Computation",
+					"params": {
+						"attribute": "max_speed",
+						"new_attribute": "new_node_attr_1"
+					}
+				}
+			}
+		]
+	},
+	"workflow_3": {
+		"data_scope_results": {
+			"data_filter": {
+				"data_source": "raw",
+				"data_operation": "Edge_Attribute_Filter",
+				"str_value": [
+					"green"
+				],
+				"operator": "=",
+				"attribute": "category"
+			},
+			"num_nodes": 50000,
+			"num_edges": 21460
+		},
+		"analysis_scope_results": [
+			{
+				"analysis_focus": "Graph",
+				"analysis_task": "Visualize",
+				"system_operation": {
+					"op": "Graph_Layout"
+				}
+			},
+			{
+				"analysis_focus": "Attribute",
+				"analysis_task": "Edit",
+				"system_operation": {
+					"op": "Update_Node",
+					"params": {
+						"node_id": 32113,
+						"attribute": "reactive",
+						"value": false
+					}
+				}
+			},
+			{
+				"analysis_focus": "Comparison",
+				"analysis_task": "Extrema",
+				"system_operation": {
+					"op": "Maximum",
+					"params": {
+						"attribute": "reactive"
+					}
+				}
+			}
+		]
+	},
+	"workflow_4": {
+		"data_scope_results": {
+			"data_filter": {
+				"data_source": "prior",
+				"data_operation": "Edge_Attribute_Filter",
+				"str_value": [
+					"green"
+				],
+				"operator": "=",
+				"attribute": "category"
+			},
+			"num_nodes": 50000,
+			"num_edges": 21460
+		},
+		"analysis_scope_results": [
+			{
+				"analysis_focus": "Comparison",
+				"analysis_task": "Extrema",
+				"system_operation": {
+					"op": "Maximum",
+					"params": {
+						"attribute": "max_speed"
+					}
+				}
+			}
+		]
+	},
+	"workflow_5": {
+		"data_scope_results": {
+			"data_filter": {
+				"data_source": "prior",
+				"data_operation": "Node_Attribute_Filter",
+				"bool_value": [
+					false
+				],
+				"operator": "=",
+				"attribute": "reactive"
+			},
+			"num_nodes": 22390,
+			"num_edges": 4293
+		},
+		"analysis_scope_results": [
+			{
+				"analysis_focus": "Attributes",
+				"analysis_task": "Compute",
+				"system_operation": {
+					"op": "Local_Custom_Computation",
+					"params": {
+						"attribute": "max_speed",
+						"new_attribute": "new_node_attr_1"
+					}
+				}
+			},
+			{
+				"analysis_focus": "Comparison",
+				"analysis_task": "Sort",
+				"system_operation": {
+					"op": "Sort_Edge_Attribute_Value",
+					"params": {
+						"attribute": "derivative",
+						"order": "asc"
+					}
+				}
+			}
+		]
+	},
+	"workflow_6": {
+		"data_scope_results": {
+			"data_filter": {
+				"data_source": "raw",
+				"data_operation": null
+			},
+			"num_nodes": 50000,
+			"num_edges": 49760
+		},
+		"analysis_scope_results": [
+			{
+				"analysis_focus": "Graph",
+				"analysis_task": "Accessibility",
+				"system_operation": {
+					"op": "Path_Check",
+					"params": {
+						"src_node_id": 8945,
+						"dst_node_id": 17422
+					}
+				}
+			},
+			{
+				"analysis_focus": "Graph",
+				"analysis_task": "Group",
+				"system_operation": {
+					"op": "Connected_Components"
+				}
+			},
+			{
+				"analysis_focus": "Attribute",
+				"analysis_task": "Edit",
+				"system_operation": {
+					"op": "Update_Edge",
+					"params": {
+						"source_id": 13815,
+						"target_id": 33696,
+						"attribute": "influence",
+						"value": -1.4933925054018875
+					}
+				}
+			},
+			{
+				"analysis_focus": "Attribute",
+				"analysis_task": "Edit",
+				"system_operation": {
+					"op": "Update_Edge",
+					"params": {
+						"source_id": 3889,
+						"target_id": 5504,
+						"attribute": "influence",
+						"value": 6.196944906839231
+					}
+				}
+			},
+			{
+				"analysis_focus": "Graph",
+				"analysis_task": "Accessibility",
+				"system_operation": {
+					"op": "Single_Source_Shortest_Path",
+					"params": {
+						"src_node_id": 16756
+					}
+				}
+			},
+			{
+				"analysis_focus": "Attribute",
+				"analysis_task": "Edit",
+				"system_operation": {
+					"op": "Update_Edge",
+					"params": {
+						"source_id": 22139,
+						"target_id": 37847,
+						"attribute": "influence",
+						"value": -1.0863610175546217
+					}
+				}
+			},
+			{
+				"analysis_focus": "Comparison",
+				"analysis_task": "Extrema",
+				"system_operation": {
+					"op": "Maximum",
+					"params": {
+						"attribute": "tagged"
+					}
+				}
+			}
+		]
+	},
+	"workflow_7": {
+		"data_scope_results": {
+			"data_filter": {
+				"data_source": "prior",
+				"data_operation": "Edge_Attribute_Filter",
+				"str_value": [
+					"yellow",
+					"black",
+					"green"
+				],
+				"operator": "in",
+				"attribute": "category"
+			},
+			"num_nodes": 50000,
+			"num_edges": 35945
+		},
+		"analysis_scope_results": [
+			{
+				"analysis_focus": "Attributes",
+				"analysis_task": "Compute",
+				"system_operation": {
+					"op": "Count"
+				}
+			},
+			{
+				"analysis_focus": "Graph",
+				"analysis_task": "Edit",
+				"system_operation": {
+					"op": "Update_Edges",
+					"params": {
+						"node_attribute": "tagged",
+						"new_edge_attribute": "new_edge_attr_1",
+						"agg": "or"
+					}
+				}
+			}
+		]
+	},
+	"workflow_8": {
+		"data_scope_results": {
+			"data_filter": {
+				"data_source": "prior",
+				"data_operation": "Edge_Attribute_Filter",
+				"str_value": [
+					"yellow",
+					"black"
+				],
+				"operator": "in",
+				"attribute": "category"
+			},
+			"num_nodes": 50000,
+			"num_edges": 14485
+		},
+		"analysis_scope_results": [
+			{
+				"analysis_focus": "Graph",
+				"analysis_task": "Graph_Metrics",
+				"system_operation": {
+					"op": "Eigenvector_Centrality"
+				}
+			},
+			{
+				"analysis_focus": "Graph",
+				"analysis_task": "Group",
+				"system_operation": {
+					"op": "Graph_Clustering"
+				}
+			},
+			{
+				"analysis_focus": "Attributes",
+				"analysis_task": "Compute",
+				"system_operation": {
+					"op": "Global_Custom_Computation",
+					"params": {
+						"attribute": "max_speed",
+						"agg": "avg"
+					}
+				}
+			},
+			{
+				"analysis_focus": "Attributes",
+				"analysis_task": "Compute",
+				"system_operation": {
+					"op": "Local_Custom_Computation",
+					"params": {
+						"attribute": "max_speed",
+						"new_attribute": "new_node_attr_1"
+					}
+				}
+			},
+			{
+				"analysis_focus": "Comparison",
+				"analysis_task": "Extrema",
+				"system_operation": {
+					"op": "Histogram",
+					"params": {
+						"attribute": "reactive"
+					}
+				}
+			},
+			{
+				"analysis_focus": "Graph",
+				"analysis_task": "Group",
+				"system_operation": {
+					"op": "Connected_Components"
+				}
+			},
+			{
+				"analysis_focus": "Attribute",
+				"analysis_task": "Edit",
+				"system_operation": {
+					"op": "Update_Node",
+					"params": {
+						"node_id": 33309,
+						"attribute": "reactive",
+						"value": false
+					}
+				}
+			},
+			{
+				"analysis_focus": "Comparison",
+				"analysis_task": "Sort",
+				"system_operation": {
+					"op": "Sort_Node_Attribute_Value",
+					"params": {
+						"attribute": "max_speed",
+						"order": "asc"
+					}
+				}
+			}
+		]
+	}
+}

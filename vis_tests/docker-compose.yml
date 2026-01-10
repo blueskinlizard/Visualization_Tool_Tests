@@ -1,0 +1,31 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "4173:4173"
+    volumes:
+      # Mount dataset for easy updates without rebuilding
+      - ./dataset_2:/app/dataset_2:ro
+      # Optional: mount source for development
+      # - ./src:/app/src
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+
+  # Development service (optional)
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    command: npm run dev -- --host
+    profiles:
+      - dev

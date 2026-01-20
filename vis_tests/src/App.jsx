@@ -4,10 +4,11 @@ import viteLogo from '/vite.svg'
 import './App.css'
 import DeckGLScript from './deckgl_script/DeckGLScript'
 import ReagraphScript from './reagraph_script/ReagraphScript'
+import CosmosGLScript from './cosmosgl_script/CosmosGLScript'
 
 function App() {
-  const [visType, setVisType] = useState('deckgl');
-  const [edgeLimit, setEdgeLimit] = useState(12500);
+  const [visType, setVisType] = useState('cosmosgl');
+  const [edgeLimit, setEdgeLimit] = useState(25000);
 
   return (
     <>
@@ -34,6 +35,7 @@ function App() {
               <option value="reagraph">Reagraph</option>
               <option value="deckgl">DeckGL</option>
               <option value="stardust">Stardust</option>
+              <option value="cosmosgl">Cosmosgl</option>
             </select>
           </div>
           
@@ -62,6 +64,7 @@ function App() {
             title="Stardust Visualization"
           />
         )}
+        {visType === 'cosmosgl' && <CosmosGLScript edgeLimit={edgeLimit} />}
       </div>
     </>
   )
